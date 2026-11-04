@@ -14,7 +14,8 @@ import anthropic
 from tools import TOOLS, run_tool
 
 ROOT = Path(__file__).parent
-SYSTEM_PROMPT = (ROOT / "prompts" / "system_prompt.md").read_text(encoding="utf-8")
+SYSTEM_PROMPT_PATH = ROOT / "prompts" / "system_prompt.md"
+DEFAULT_MODEL = "claude-opus-5-5"
 MAX_TURNS = 10
 
 
@@ -30,30 +31,44 @@ def load_env(path: Path = ROOT / ".env") -> None:
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
-def hello_model() -> None:
-    """Smoke test: one message, no system prompt, no tools. Prints the reply."""
-    client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
-    model = os.environ.get("KYC_MODEL", "claude-opus-5-5")
-    response = client.messages.create(
-        model=model,
-        max_tokens=200,
-        messages=[{"role": "user", "content": "Say hello and name the model you are."}],
+def load_system_prompt() -> str:
+    """Read the system prompt from its own file. Edit that file, not this code."""
+    text = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8").strip()
+    if not text:
+        raise RuntimeError(f"System prompt file is empty: {SYSTEM_PROMPT_PATH}")
+    return text
+
+
+def call_model(client: anthropic.Anthropic, messages: list, max_tokens: int = 4096, **kwargs):
+    """The single place that calls the model. Always sends the system prompt."""
+    return client.messages.create(
+        model=os.environ.get("KYC_MODEL", DEFAULT_MODEL),
+        max_tokens=max_tokens,
+        system=load_system_prompt(),
+        messages=messages,
+        **kwargs,
     )
-    print(f"[requested: {model} | served: {response.model}]")
+
+
+def hello_model() -> None:
+    """Smoke test: one message, no tools. Prints the reply."""
+    client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
+    response = call_model(
+        client,
+        [{"role": "user", "content": "Say hello and name the model you are."}],
+        max_tokens=200,
+    )
+    print(f"[requested: {os.environ.get('KYC_MODEL', DEFAULT_MODEL)} | served: {response.model}]")
     print("".join(b.text for b in response.content if b.type == "text"))
 
 
 def check_kyc(kyc_text: str) -> str:
     """Run the agent loop on KYC form data + OCR text and return the report."""
     client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
-    model = os.environ.get("KYC_MODEL", "claude-opus-5-5")
     messages = [{"role": "user", "content": kyc_text}]
 
     for _ in range(MAX_TURNS):
-        kwargs = {"model": model, "max_tokens": 4096, "system": SYSTEM_PROMPT, "messages": messages}
-        if TOOLS:
-            kwargs["tools"] = TOOLS
-        response = client.messages.create(**kwargs)
+        response = call_model(client, messages, **({"tools": TOOLS} if TOOLS else {}))
 
         if response.stop_reason != "tool_use":
             return "".join(b.text for b in response.content if b.type == "text")
