@@ -1,0 +1,32 @@
+Check this KYC application and return the KYC report.
+
+KYC APPLICATION - REF KYC-2026-10482
+
+[FORM DATA]
+Full name: Ravi Kumar
+Date of birth: 12-03-1990
+Mobile: +91 98XXXXXX21
+Email: ravi.kumar@example.com
+PAN: ABCPK1234F
+Aadhaar (last 4): 4821
+Address: Flat 304, Sai Residency, Baner Road, Pune, Maharashtra 411045
+Documents: PAN card, Aadhaar card, electricity bill
+
+[OCR - PAN CARD]
+INCOME TAX DEPARTMENT
+Permanent Account Number: ABCPK1234F
+Name: RAVI KUMAR
+Father’s Name: SURESH KUMAR
+Date of Birth: 12/03/1991
+
+[OCR - AADHAAR CARD]
+Ravi Kumar
+DOB: 12/03/1990
+Male
+XXXX XXXX 4821
+
+[OCR - ADDRESS PROOF: ELECTRICITY BILL]
+Consumer name: RAVI KUMAR
+Supply address: Flat 304, Sai Residency, Baner Road, Pune 411045
+Bill date: 05-09-2026
+Due date: 25-09-2026
