@@ -40,7 +40,9 @@ def load_system_prompt() -> str:
 
 
 def call_model(client: anthropic.Anthropic, messages: list, max_tokens: int = 4096, **kwargs):
-    """The single place that calls the model. Always sends the system prompt."""
+    """The single place that calls the model. Always sends the system prompt and tools."""
+    if TOOLS:
+        kwargs.setdefault("tools", TOOLS)
     return client.messages.create(
         model=os.environ.get("KYC_MODEL", DEFAULT_MODEL),
         max_tokens=max_tokens,
@@ -68,7 +70,7 @@ def check_kyc(kyc_text: str) -> str:
     messages = [{"role": "user", "content": kyc_text}]
 
     for _ in range(MAX_TURNS):
-        response = call_model(client, messages, **({"tools": TOOLS} if TOOLS else {}))
+        response = call_model(client, messages)
 
         if response.stop_reason != "tool_use":
             return "".join(b.text for b in response.content if b.type == "text")
