@@ -1,0 +1,29 @@
+Check this KYC application and return the KYC report.
+
+KYC APPLICATION - REF KYC-2026-10533
+
+[FORM DATA]
+Full name: Anil Mehta
+Date of birth: 15-06-1979
+Mobile: +91 97XXXXXX55
+Email: anil.mehta@example.com
+PAN: BXRPM4321C
+Aadhaar (last 4): 7710
+Address: 22 Lake View Apartments, Andheri East, Mumbai, Maharashtra 400069
+Documents: PAN card, Aadhaar card
+
+[OCR - PAN CARD]
+INCOME TAX DEPARTMENT
+Permanent Account Number: BXRPM4321C
+Name: ANIL MEHTA
+Father's Name: KIRAN MEHTA
+Date of Birth: 15/06/1979
+
+[OCR - AADHAAR CARD]
+Anil Mehta
+DOB: 15/06/1979
+Male
+XXXX XXXX 7710
+
+[OCR - ADDRESS PROOF]
+(no document uploaded)

@@ -1,0 +1,32 @@
+Check this KYC application and return the KYC report.
+
+KYC APPLICATION - REF KYC-2026-10548
+
+[FORM DATA]
+Full name: Rahul Verma
+Date of birth: 09-01-1995
+Mobile: +91 90XXXXXX83
+Email: rahul.verma@example.com
+PAN: CDQPV2468M
+Aadhaar (last 4): 3302
+Address: 7 Shanti Nagar, Sector 21, Noida, Uttar Pradesh 201301
+Documents: PAN card, Aadhaar card, electricity bill
+
+[OCR - PAN CARD]
+INCOME TAX DEPARTMENT
+Permanent Account Number: CDQPV2468M
+Name: RAHUL VERMA
+Father's Name: MOHAN VERMA
+Date of Birth: 09/01/1995
+
+[OCR - AADHAAR CARD]
+Sunil Joshi
+DOB: 09/01/1995
+Male
+XXXX XXXX 3302
+
+[OCR - ADDRESS PROOF: ELECTRICITY BILL]
+Consumer name: RAHUL VERMA
+Supply address: 7 Shanti Nagar, Sector 21, Noida 201301
+Bill date: 12-10-2026
+Due date: 30-10-2026

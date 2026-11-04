@@ -1,0 +1,32 @@
+Check this KYC application and return the KYC report.
+
+KYC APPLICATION - REF KYC-2026-10517
+
+[FORM DATA]
+Full name: Priya Sharma
+Date of birth: 04-11-1988
+Mobile: +91 99XXXXXX07
+Email: priya.sharma@example.com
+PAN: ABCPS5678K
+Aadhaar (last 4): 1234
+Address: B-12, Green Park Society, Kothrud, Pune, Maharashtra 411038
+Documents: PAN card, Aadhaar card, electricity bill
+
+[OCR - PAN CARD]
+INCOME TAX DEPARTMENT
+Permanent Account Number: ABCPS5678K
+Name: PRIYA SHARMA
+Father's Name: RAJESH SHARMA
+Date of Birth: 04/11/1988
+
+[OCR - AADHAAR CARD]
+Priya Sharma
+DOB: 04/11/1988
+Female
+XXXX XXXX 1234
+
+[OCR - ADDRESS PROOF: ELECTRICITY BILL]
+Consumer name: PRIYA SHARMA
+Supply address: B-12, Green Park Society, Kothrud, Pune 411038
+Bill date: 20-10-2026
+Due date: 05-11-2026

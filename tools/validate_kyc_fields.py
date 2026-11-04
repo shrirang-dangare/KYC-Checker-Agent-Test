@@ -6,6 +6,7 @@ code runs fixed rules and returns findings in the same shape as schema.Finding
 """
 
 import json
+import os
 import re
 from datetime import date, datetime
 from typing import Any
@@ -169,6 +170,7 @@ def check_address_match(form: dict, address_proof: dict) -> dict:
 
 def validate_kyc_fields(form: dict, pan_card: dict, aadhaar_card: dict, address_proof: dict,
                         as_of: str | None = None) -> str:
+    as_of = as_of or os.environ.get("KYC_AS_OF")  # KYC_AS_OF pins the date for repeatable evals
     check_date = _parse_date(as_of) if as_of else date.today()
     if check_date is None:
         return json.dumps({"error": f"as_of '{as_of}' is not a valid date"})
