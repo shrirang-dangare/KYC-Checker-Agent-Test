@@ -22,4 +22,6 @@ python main.py path/to/kyc_input.txt
 - `main.py` — entry point: loads `.env`, reads KYC text, runs the agent loop with the Anthropic SDK, prints the report.
 - `prompts/system_prompt.md` — the system prompt defining the checks and the KYC report format.
 - `schema.py` — output contract: typed `KYCReport` and `validate_report()`.
+- `guardrails.py` — code-enforced safety rules on the final result (no self-verify, escalate to compliance, masked IDs, customer messages held for approval); violations are blocked and flagged for a human.
+- `demos/safety_demo.py` — offline demo that trips each guardrail and the 5-tool-call stop rule: `python demos/safety_demo.py`.
 - `tools/` — tool registry (`TOOLS`, `HANDLERS`) in `__init__.py`; `validate_kyc_fields.py` runs deterministic PAN / name / DOB / expiry / address checks. Try it offline: `python tools/validate_kyc_fields.py samples/kyc-2026-10482.tool_input.json`.
