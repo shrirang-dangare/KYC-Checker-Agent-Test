@@ -8,10 +8,12 @@ Usage:
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 import anthropic
 
+import spine_ledger
 from guardrails import build_result, flag_for_human, mask_ids
 from tools import TOOLS, run_tool
 
@@ -77,6 +79,23 @@ def _indent(text: str, limit: int = 2000) -> str:
 
 
 def check_kyc(kyc_text: str) -> dict:
+    """Run the agent once, then record the run in The Spine ledger (fail-open)."""
+    stats: dict = {"model": os.environ.get("KYC_MODEL", DEFAULT_MODEL), "model_calls": 0,
+                   "input_tokens": 0, "output_tokens": 0, "tool_calls": {}}
+    started = time.monotonic()
+    result, error = None, None
+    try:
+        result = _run_agent(kyc_text, stats)
+        return result
+    except BaseException as exc:
+        error = exc
+        raise
+    finally:
+        stats["duration_ms"] = round((time.monotonic() - started) * 1000)
+        spine_ledger.record_run(kyc_text, result, stats, error)
+
+
+def _run_agent(kyc_text: str, stats: dict) -> dict:
     """Agent loop with stop rule and guardrails.
 
     Ends after one final answer (checked by guardrails.build_result) or after
@@ -91,6 +110,11 @@ def check_kyc(kyc_text: str) -> dict:
     while True:
         turn += 1
         response = call_model(client, messages)
+        stats["model_calls"] += 1
+        stats["model"] = getattr(response, "model", stats["model"])
+        usage = getattr(response, "usage", None)
+        stats["input_tokens"] += getattr(usage, "input_tokens", 0) or 0
+        stats["output_tokens"] += getattr(usage, "output_tokens", 0) or 0
         log(f"\n=== Turn {turn} | model: {response.model} | stop_reason: {response.stop_reason} ===")
 
         tool_calls = []
@@ -123,6 +147,7 @@ def check_kyc(kyc_text: str) -> dict:
         results = []
         for call in tool_calls:
             tool_calls_made += 1
+            stats["tool_calls"][call.name] = stats["tool_calls"].get(call.name, 0) + 1
             log(f"  [tool call {tool_calls_made}/{MAX_TOOL_CALLS}] {call.name}\n"
                 + _indent(json.dumps(call.input, indent=2, ensure_ascii=False)))
             output = run_tool(call.name, call.input)

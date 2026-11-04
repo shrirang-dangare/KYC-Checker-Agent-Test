@@ -25,4 +25,7 @@ python main.py path/to/kyc_input.txt
 - `guardrails.py` — code-enforced safety rules on the final result (no self-verify, escalate to compliance, masked IDs, customer messages held for approval); violations are blocked and flagged for a human.
 - `demos/safety_demo.py` — offline demo that trips each guardrail and the 5-tool-call stop rule: `python demos/safety_demo.py`.
 - `evals/` — 5-case eval (incl. one prompt-injection case) with officer recommendations in `cases.json`; `python evals/run_eval.py` prints pass/fail per case and exits non-zero on any failure.
+- `aop/kyc_review.yaml` — The Spine operating procedure: numbered method, tool allow-list, guardrails (incl. human approval), each mapped to the code that enforces it.
+- `spine.skills.json` — registers the agent as a Spine satellite, one skill per tool, and the `bgo_internal` connector.
+- `spine_ledger.py` — fail-open ledger: after every run POSTs `/metering/events` and `/outcomes` (cross-linked by id, `X-Tenant-ID` header) to `SPINE_CENTRAL_INVOCATION_URL`; silent no-op when unset.
 - `tools/` — tool registry (`TOOLS`, `HANDLERS`) in `__init__.py`; `validate_kyc_fields.py` runs deterministic PAN / name / DOB / expiry / address checks. Try it offline: `python tools/validate_kyc_fields.py samples/kyc-2026-10482.tool_input.json`.

@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "agent": {
+    "id": "kyc-checker",
+    "kind": "satellite",
+    "name": "KYC Checker",
+    "description": "Checks a customer's KYC details for completeness and consistency and recommends verify, resubmit or escalate for a human to decide.",
+    "version": "0.1.0",
+    "entrypoint": "main.py:check_kyc",
+    "aop": "aop/kyc_review.yaml",
+    "model": "claude-opus-5-5",
+    "input": {
+      "type": "text/plain"
+    },
+    "output": {
+      "schema": "schema.py#KYCReport",
+      "envelope": "guardrails.py#build_result"
+    },
+    "requires_human_approval": true,
+    "eval": "evals/run_eval.py"
+  },
+  "skills": [
+    {
+      "id": "kyc-checker.validate_kyc_fields",
+      "tool": "validate_kyc_fields",
+      "description": "Run deterministic KYC checks (PAN format, name match, date-of-birth match, document expiry and address match) on fields you extracted from the form and OCR text; call it once before deciding, and pass values exactly as written.",
+      "handler": "tools/validate_kyc_fields.py:validate_kyc_fields",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "form": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Values the customer typed on the KYC form.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "dob": {
+                "type": "string",
+                "description": "Date of birth as written, e.g. 12-03-1990."
+              },
+              "pan": {
+                "type": "string",
+                "description": "Full PAN as written on the form."
+              },
+              "address": {
+                "type": "string"
+              }
+            }
+          },
+          "pan_card": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Values read from the PAN card OCR.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "dob": {
+                "type": "string"
+              },
+              "pan": {
+                "type": "string"
+              }
+            }
+          },
+          "aadhaar_card": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Values read from the Aadhaar card OCR.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "dob": {
+                "type": "string"
+              }
+            }
+          },
+          "address_proof": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Values read from the address proof OCR.",
+            "properties": {
+              "document_type": {
+                "type": "string",
+                "description": "e.g. electricity bill, passport."
+              },
+              "name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "issue_date": {
+                "type": "string",
+                "description": "Bill or issue date, if shown."
+              },
+              "expiry_date": {
+                "type": "string",
+                "description": "Expiry date, if the document has one."
+              }
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "description": "Date to check expiry against (YYYY-MM-DD). Defaults to today."
+          }
+        },
+        "required": [
+          "form",
+          "pan_card",
+          "aadhaar_card",
+          "address_proof"
+        ],
+        "additionalProperties": false
+      },
+      "output": "JSON {as_of, findings: [{check, status: pass|fail, detail}]}",
+      "deterministic": true,
+      "side_effects": "none",
+      "network": false
+    }
+  ],
+  "connector": {
+    "type": "http",
+    "tenant_id": "bgo_internal",
+    "scope": {
+      "tenants": [
+        "bgo_internal"
+      ]
+    },
+    "base_url_env": "SPINE_CENTRAL_INVOCATION_URL",
+    "headers": {
+      "X-Tenant-ID": "bgo_internal"
+    },
+    "endpoints": {
+      "metering": {
+        "method": "POST",
+        "path": "/metering/events"
+      },
+      "outcomes": {
+        "method": "POST",
+        "path": "/outcomes"
+      }
+    },
+    "cross_link": [
+      "run_id",
+      "metering_event.outcome_id",
+      "outcome.metering_event_id"
+    ],
+    "failure_mode": "fail_open",
+    "when_unset": "noop",
+    "timeout_seconds": 3
+  }
+}
