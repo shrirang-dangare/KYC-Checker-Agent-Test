@@ -30,6 +30,19 @@ def load_env(path: Path = ROOT / ".env") -> None:
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
+def hello_model() -> None:
+    """Smoke test: one message, no system prompt, no tools. Prints the reply."""
+    client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
+    model = os.environ.get("KYC_MODEL", "claude-opus-5-5")
+    response = client.messages.create(
+        model=model,
+        max_tokens=200,
+        messages=[{"role": "user", "content": "Say hello and name the model you are."}],
+    )
+    print(f"[requested: {model} | served: {response.model}]")
+    print("".join(b.text for b in response.content if b.type == "text"))
+
+
 def check_kyc(kyc_text: str) -> str:
     """Run the agent loop on KYC form data + OCR text and return the report."""
     client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
@@ -62,6 +75,10 @@ def main() -> None:
     load_env()
     if not os.environ.get("ANTHROPIC_API_KEY"):
         sys.exit("ANTHROPIC_API_KEY is not set. Copy .env.example to .env and add your key.")
+
+    if sys.argv[1:] == ["--hello"]:
+        hello_model()
+        return
 
     kyc_text = Path(sys.argv[1]).read_text(encoding="utf-8") if len(sys.argv) > 1 else sys.stdin.read()
     if not kyc_text.strip():

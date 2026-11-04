@@ -13,6 +13,7 @@ cp .env.example .env   # then add your ANTHROPIC_API_KEY
 ## Run
 
 ```bash
+python main.py --hello              # smoke test: key, SDK, model id
 python main.py path/to/kyc_input.txt
 ```
 
