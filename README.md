@@ -20,4 +20,5 @@ python main.py path/to/kyc_input.txt
 
 - `main.py` — entry point: loads `.env`, reads KYC text, runs the agent loop with the Anthropic SDK, prints the report.
 - `prompts/system_prompt.md` — the system prompt defining the checks and the KYC report format.
+- `schema.py` — output contract: typed `KYCReport` and `validate_report()`.
 - `tools/__init__.py` — tool schemas (`TOOLS`) and their Python handlers (`HANDLERS`); empty for now.
